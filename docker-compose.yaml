@@ -1,0 +1,105 @@
+version: "3"
+
+services:
+  ray-head:
+    build: 
+     context: .
+     dockerfile: ./docker/ray-cluster/Dockerfile
+    image: ${RAY_IMAGE}
+    container_name: ray-head
+    ports:
+      - "${REDISPORT}:${REDISPORT}"
+      - "${DASHBOARDPORT}:${DASHBOARDPORT}"
+      - "${HEADNODEPORT}:${HEADNODEPORT}"
+      - "${METRICS_EXPORT_PORT}:${METRICS_EXPORT_PORT}"
+    env_file:
+      - .env
+    #command: bash -c "ray start --head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD}  --block"
+    shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '2g'
+    networks:
+      - ray_net
+    volumes:
+      - ./shared:/tmp/shared/
+
+  ray-worker:
+    build: 
+      context: .
+      dockerfile: ./docker/ray-cluster/Dockerfile
+    image: ${RAY_IMAGE}
+    depends_on: 
+      - ray-head
+    env_file:
+      - .env
+    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=${NUM_CPU_WORKER} --metrics-export-port=${METRICS_EXPORT_PORT} --block" 
+    shm_size: 2g
+    deploy:
+      mode: replicated
+      replicas: ${NUM_WORKERS} 
+      resources:
+        limits:
+          cpus: ${NUM_CPU_WORKER}
+          memory: '2g'
+    networks:
+      - ray_net
+    # volumes:
+    #   - ./shared:/tmp/shared/ray
+  
+  jupyter:
+    build: 
+      context: .
+      dockerfile: ./docker/jupyter/Dockerfile
+    volumes:
+      - ./work:/home/jovyan/work
+    container_name: jupyter
+    ports:
+      - 8888:8888
+    command: "start-notebook.sh --NotebookApp.token="
+    networks:
+      - ray_net
+
+  # My grafana service 
+  grafana:
+    build:
+      context: ./docker/grafana
+    container_name: grafana
+    ports:
+      - 3001:3001
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - ray_net
+
+
+  prometheus:
+    build:
+      context: ./docker/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./shared/:/tmp/shared/
+    ports:
+      - "9090:9090"
+    networks:
+      - ray_net
+
+
+
+
+volumes:
+  grafana-data:
+    external: true
+
+  
+networks:
+  ray_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.63.0.0/16

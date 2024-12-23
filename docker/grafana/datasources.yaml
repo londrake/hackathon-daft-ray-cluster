@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: "GET"
+      manageAlerts: false
+      prometheusType: "Prometheus"
+      cacheLevel: "None"
+      disableRecordingRules: true
+      incrementalQueryOverlapWindow: "10m"
+      timeInterval: "15s"
+      queryTimeout: "30s"
+      exemplarTraceIdDestinations: []
+      defaultEditor: "code"
+    version: 1
+    uid: prometheus
+    secureJsonData: {}

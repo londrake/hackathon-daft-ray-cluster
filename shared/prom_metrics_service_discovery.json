@@ -1,0 +1,1 @@
+[{"labels": {"job": "ray"}, "targets": ["ray-head:8080", "ray-cluster_ray-worker_1:8080", "ray-cluster_ray-worker_2:8080", "ray-cluster_ray-worker_3:8080", "ray-cluster_ray-worker_4:8080"]}]
