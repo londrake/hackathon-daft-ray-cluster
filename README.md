@@ -1,3 +1,16 @@
+# Ray Cluster with Monitoring and Jupyter [Daft]
+
+This project implements a distributed Ray cluster with integrated monitoring using Prometheus and Grafana, plus a Jupyter environment for interactive analysis. Daft data engine is provided with this stack
+
+## 🏗️ Architecture
+
+The project consists of:
+- **Ray Head Node**: Main cluster node
+- **Ray Worker Nodes**: Worker nodes for distributed processing
+- **Prometheus**: Monitoring system for metrics collection
+- **Grafana**: Visualization platform for metrics
+- **Jupyter Lab**: Interactive environment for data science
+
 # Ray Cluster Introduction
 A simple example to create a Ray cluster using a custom docker image and a docker compose to configure the (local) cluster.
 
@@ -5,71 +18,176 @@ For more information on Ray:
 * https://www.ray.io/
 * https://github.com/ray-project/ray
 
-# Build Container
-Run the following command in this folder to build the ray container:
+# Daft Introduction
+Daft is a unified data engine for data engineering, analytics and ML/AI.
+
+Daft exposes both SQL and Python DataFrame interfaces as first-class citizens and is written in Rust.
+
+Daft provides a snappy and delightful local interactive experience, but also seamlessly scales to petabyte-scale distributed workloads.
+
+For more information on Daft:
+* https://www.getdaft.io/projects/docs/en/stable/index.html
+
+## 📚 Technology Stack
+
+### Main Python Libraries
+- **Ray (2.4.0)**: Framework for distributed computing
+- **NumPy**: Numerical computing and multidimensional arrays
+- **Pandas**: Data manipulation and analysis
+- **Jupyter**: Interactive development environment
+- **Matplotlib**: Data visualization
+
+### Monitoring Tools
+- **Prometheus**: Metrics collection
+- **Grafana**: Metrics visualization
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker
+- Docker Compose
+- Git
+
+### Installation
+
+1. Clone the repository:
+
 ```
-# docker build -t raytest .
-docker compose build
-```
-
-# Configure Cluster
-## Docker compose
-A docker compose file was created to configure the cluster for us. You can start it as follows:
-```
-docker-compose up
-```
-Or optionally run in detatched mode by adding -d.
-
-The dashboard should now be accessible here: http://localhost:8265
-
-Once you are done, tear down the cluster with
-```
-docker-compose down
-```
-
-## Ports
-The following ports are exposed by default:
-* ```8265```    Ray dashboard
-* ```6379```    Reddis port to allow external workers to join (optional)
-* ```10001```   Head node access port to connect external Ray client (optional)
-
-# Connect to Cluster
-The following is a minimum working example to connect to the cluster head node **
-```
-import ray
-ray.init(address='ray://<head_node_ip_address>:10001')
-```
-** This may require prequisites on your local PC matching those of the cluster.
-
-For example, when running the docker-compose from above, this is running on ```localhost:10001``` by default.
-
-A slightly more advanced example, executing some work on the workers and listing the IPs:
-```
-from collections import Counter
-import socket
-import time
-
-import ray
-
-ray.init(address='ray://localhost:10001')
-
-print('''This cluster consists of
-    {} nodes in total
-    {} CPU resources in total
-'''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
-
-@ray.remote
-def f():
-    time.sleep(0.001)
-    # Return IP address.
-    return socket.gethostbyname(socket.gethostname())
-
-object_ids = [f.remote() for _ in range(10000)]
-ip_addresses = ray.get(object_ids)
-
-print('Tasks executed')
-for ip_address, num_tasks in Counter(ip_addresses).items():
-    print('    {} tasks on {}'.format(num_tasks, ip_address))
+bash
+git clone https://github.com/yourUsername/ray-cluster.git
+cd ray-cluster
 ```
 
-or simply run the included script ```python ray_test.py```.
+2. Build the services:
+
+```
+bash
+#Create the volume
+docker volume create grafana-data
+
+# Build the imagaes
+docker-compose build
+```
+
+3. Start the cluster:
+
+```
+bash
+docker-compose up -d
+```
+
+## 📊 Service Access
+
+- **Ray Dashboard**: http://localhost:8265
+- **Grafana**: http://localhost:3001
+- **Prometheus**: http://localhost:9090
+- **Jupyter Lab**: http://localhost:8888
+
+## 🔬 Using Jupyter
+
+### Accessing Jupyter Lab
+1. Open your browser and go to http://localhost:8888
+2. [Optional]Use the token shown in the container logs:
+
+```
+bash
+docker-compose logs jupyter
+```
+
+### Example Notebooks
+The project includes sample notebooks for:
+- Initial Ray cluster setup
+- Distributed computation examples
+- Resource monitoring
+
+### Best Practices
+- Use `ray.init(address='ray://ray-head:10001')` at the beginning of each notebook
+- Monitor resources through the Ray Dashboard
+- Save notebooks in the `/work` directory
+
+## 🎯 Grafana Dashboard Setup
+
+### Importing Dashboards
+
+1. Access Grafana at http://localhost:3001
+2. Navigate to Dashboards > Import
+3. You can import dashboards:
+
+- Locate the dashboard JSON files from `/docker/grafana/dashboards/`
+- In Grafana, click "Upload JSON file"
+- Select your JSON file
+- Select "Prometheus" as the data source
+- Click "Import"
+
+### Default Dashboards
+The project includes several pre-configured dashboards:
+- **Ray Cluster Overview**: General cluster metrics
+- **Node Metrics**: Individual node performance
+- **Task Monitoring**: Ray task statistics
+- **Resource Usage**: CPU, Memory, and GPU utilization
+
+## 🔧 Configuration
+
+### Directory Structure
+
+ray-cluster/
+├── docker/
+│ ├── ray/
+│ │ └── Dockerfile
+│ ├── grafana/
+│ │ └── Dockerfile
+│ ├── jupyter/
+│ │ └── Dockerfile
+│ └── prometheus/
+│ └── prometheus.yml
+├── work/
+│ ├── job/
+│ └── examples_notebook...
+├── wd/
+│ └── examples_script...
+├── docker-compose.yml
+├── .env
+└── README.md
+
+### Jupyter Configuration
+The Jupyter container includes:
+- Python 3.12.8 kernel
+- JupyterLab extensions
+- Ray integration
+- Ray cluster access
+
+### Environment Variables
+Main environment variables can be configured in the `.env` file:
+- `JUPYTER_TOKEN`: Jupyter access token
+- `RAY_GRAFANA_IFRAME_HOST`: URL for Grafana embedding
+- Other configuration parameters...
+
+## 📈 Code Examples
+
+### Ray Initialization in Jupyter
+
+Execute the ray_test.ipynb
+
+### Daft Initialization in Jupyter
+
+Execute the daft_test.ipynb
+
+
+## 🔒 Security
+- Exposed ports are configured for local access
+- Grafana is configured with anonymous authentication for development
+- Prometheus is accessible only from Docker internal network
+
+## 🤝 Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📝 License
+[MIT](https://choosealicense.com/licenses/mit/)
+
+## 👥 Authors
+- Luca Riccardi
+
+## 📞 Support
+For support, please open an issue in the GitHub repository.
+
+
