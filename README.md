@@ -54,7 +54,7 @@ For more information on Daft:
 
 ```
 bash
-git clone https://github.com/<YOUR_GH_USERNAME>/hackathon-daft-ray-cluster.git
+git clone https://github.com/londrake/hackathon-daft-ray-cluster.git
 cd hackathon-daft-ray-cluster
 ```
 
