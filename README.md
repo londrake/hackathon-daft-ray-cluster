@@ -129,7 +129,7 @@ The project includes several pre-configured dashboards:
 ## 🔧 Configuration
 
 ### Directory Structure
-
+```
 ray-cluster/
 ├── docker/
 │ ├── ray/
@@ -148,7 +148,7 @@ ray-cluster/
 ├── docker-compose.yml
 ├── .env
 └── README.md
-
+```
 ### Jupyter Configuration
 The Jupyter container includes:
 - Python 3.12.8 kernel
