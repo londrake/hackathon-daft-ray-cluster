@@ -91,7 +91,7 @@ docker compose up -d
 
 ```
 bash
-docker-compose logs jupyter
+docker compose logs jupyter
 ```
 
 ### Example Notebooks
