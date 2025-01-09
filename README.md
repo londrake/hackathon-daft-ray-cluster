@@ -54,8 +54,8 @@ For more information on Daft:
 
 ```
 bash
-git clone https://github.com/yourUsername/ray-cluster.git
-cd ray-cluster
+git clone https://github.com/londrake/hackathon-daft-ray-cluster.git
+cd hackathon-daft-ray-cluster
 ```
 
 2. Build the services:
@@ -66,14 +66,14 @@ bash
 docker volume create grafana-data
 
 # Build the imagaes
-docker-compose build
+docker compose build
 ```
 
 3. Start the cluster:
 
 ```
 bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## 📊 Service Access
@@ -91,7 +91,7 @@ docker-compose up -d
 
 ```
 bash
-docker-compose logs jupyter
+docker compose logs jupyter
 ```
 
 ### Example Notebooks
