@@ -2,5 +2,5 @@ numpy==1.26.0
 pandas==2.1.4
 matplotlib==3.8.0
 ray[client]==2.40.0
-getdaft[aws]==0.4.0
+getdaft[aws,deltalake]==0.4.0
 ipywidgets==8.1.5
